@@ -102,7 +102,7 @@ export default function CompareIPhones() {
       return `${phone.shortName}-${shortFeature}-${duration}`
     }).join(",").slice(0, 4000)
 
-    router.push(`https://vlabURL.com/?lmclicks=${encodeURIComponent(lmclicks)}&mo=${encodeURIComponent(moData)}&exit=${exitValue}&buy=${buyParam}`)
+    router.push(`https://baylor.qualtrics.com/jfe/form/SV_7VOYibk5CAELbYW/?lmclicks=${encodeURIComponent(lmclicks)}&mo=${encodeURIComponent(moData)}&exit=${exitValue}&buy=${buyParam}`)
   }
 
   const handleTopImageClick = () => {
