@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Battery, Camera, Cpu, ZoomIn, Wifi, Usb } from "lucide-react"
+import { Battery, Camera, Cpu, ZoomIn, Maximize, Usb } from "lucide-react"
 import { type LucideIcon } from 'lucide-react'
 
 export default function CompareIPhones() {
@@ -288,7 +288,7 @@ function getIconForFeature(feature: string): LucideIcon | undefined {
     case "batteryLife":
       return Battery
     case "iphoneSize":
-      return Wifi
+      return Maximize
     case "transferSpeeds":
       return Usb
     default:
