@@ -135,7 +135,7 @@ export default function CompareIPhones() {
       lmclicks: lmclicks,
       mo: moData,
       exit: exitValue.toString(),
-      buy: buyParam
+      buy2: buyParam
     })
 
     router.push(`${baseUrl}?${queryParams.toString()}`)
