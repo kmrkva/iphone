@@ -120,19 +120,28 @@ export default function CompareIPhones() {
 
     // Construct URL with original and Qualtrics parameters
     const lmclicks = learnMoreClicks.join(",")
-    const moData = mouseoverData.map(item => {
-      const [phoneName, feature, duration] = item.split("-")
-      const phone = phones.find(p => p.name === phoneName)
-      if (!phone) return item
-      const shortFeature = feature.slice(0, 3)
-      return `${phone.shortName}-${shortFeature}-${duration}`
-    }).join(",").slice(0, 4000)
+    const moData = mouseoverData
+      .filter(item => item) // Remove any null entries
+      .map(item => {
+        if (item.startsWith('attempt-')) {
+          // Keep attempt entries as is
+          return item
+        }
+        const [phoneName, feature, duration] = item.split("-")
+        const phone = phones.find(p => p.name === phoneName)
+        if (!phone) return null
+        const shortFeature = getShortFeatureName(feature)
+        return `${phone.shortName}-${shortFeature}-${duration}`
+      })
+      .filter(item => item) // Remove any null entries after processing
+      .join(",")
+      .slice(0, 4000)
 
     // Construct URL with existing Qualtrics parameters and new parameters
     const baseUrl = 'https://baylor.qualtrics.com/jfe/form/SV_7VOYibk5CAELbYW/'
     const queryParams = new URLSearchParams({
       ...qualtricsParms,
-      lmclicks2: lmclicks,
+      lmclicks2: learnMoreClicks.join(","),
       mo2: moData,
       exit: exitValue.toString(),
       buy2: buyParam
@@ -146,23 +155,60 @@ export default function CompareIPhones() {
   }
 
   const handleMouseEnter = (phoneName: string, feature: string) => {
-    if (learnMoreStates[phones.findIndex((phone) => phone.name === phoneName)]) {
-      mouseoverStartTime.current = Date.now()
-      currentMouseover.current = `${phoneName}-${feature}`
+    const phoneIndex = phones.findIndex((phone) => phone.name === phoneName)
+    if (!learnMoreStates[phoneIndex]) {
+      // If learn more hasn't been clicked, still track the attempt with a special prefix
+      const shortFeature = getShortFeatureName(feature)
+      setMouseoverData((prevData) => [...prevData, `attempt-${phones[phoneIndex].shortName}-${shortFeature}-0`])
+      return
     }
+    
+    mouseoverStartTime.current = Date.now()
+    currentMouseover.current = `${phoneName}-${feature}`
   }
 
   const handleMouseLeave = () => {
     if (mouseoverStartTime.current && currentMouseover.current) {
       const duration = Date.now() - mouseoverStartTime.current
       if (duration >= 20) {
-        setMouseoverData((prevData) => [...prevData, `${currentMouseover.current}-${duration}`])
+        const [phoneName, feature] = currentMouseover.current.split("-")
+        const phone = phones.find(p => p.name === phoneName)
+        if (phone) {
+          const shortFeature = getShortFeatureName(feature)
+          setMouseoverData((prevData) => [...prevData, `${phone.shortName}-${shortFeature}-${duration}`])
+        }
       }
       mouseoverStartTime.current = null
       currentMouseover.current = null
     }
   }
 
+  const getShortFeatureName = (feature: string): string => {
+    switch (feature.toLowerCase()) {
+      case "iphone display":
+      case "display":
+        return "dis"
+      case "optical zoom":
+      case "opticalzoom":
+        return "opt"
+      case "chip":
+        return "chi"
+      case "camera":
+        return "cam"
+      case "battery life":
+      case "batterylife":
+        return "bat"
+      case "iphone size":
+      case "iphonesize":
+        return "siz"
+      case "transfer speeds":
+      case "transferspeeds":
+        return "tra"
+      default:
+        return feature.slice(0, 3).toLowerCase()
+    }
+  }
+  
   useEffect(() => {
     return () => {
       if (mouseoverStartTime.current && currentMouseover.current) {
