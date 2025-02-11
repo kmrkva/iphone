@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Battery, Camera, Cpu, ZoomIn, Maximize, Usb, Check } from "lucide-react"
+import { Battery, Camera, Cpu, ZoomIn, Maximize, Usb } from "lucide-react"
 import { type LucideIcon } from 'lucide-react'
 
 function getQueryParams(): Record<string, string> {
