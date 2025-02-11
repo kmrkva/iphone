@@ -118,7 +118,7 @@ export default function CompareIPhones() {
       return
     }
 
-    // Construct URL with original and Qualtrics parameters
+    // Clean and format mouseover data
     const moData = mouseoverData
       .filter(item => item) // Remove any null entries
       .map(item => {
@@ -155,13 +155,16 @@ export default function CompareIPhones() {
 
   const handleMouseEnter = (phoneName: string, feature: string) => {
     const phoneIndex = phones.findIndex((phone) => phone.name === phoneName)
+    
     if (!learnMoreStates[phoneIndex]) {
-      // If learn more hasn't been clicked, still track the attempt with a special prefix
+      // If learn more hasn't been clicked, track as attempt
       const shortFeature = getShortFeatureName(feature)
-      setMouseoverData((prevData) => [...prevData, `attempt-${phones[phoneIndex].shortName}-${shortFeature}-0`])
+      const phone = phones[phoneIndex]
+      setMouseoverData((prevData) => [...prevData, `attempt-${phone.shortName}-${shortFeature}-0`])
       return
     }
     
+    // If learn more was clicked, start timing the mouseover
     mouseoverStartTime.current = Date.now()
     currentMouseover.current = `${phoneName}-${feature}`
   }
@@ -174,7 +177,11 @@ export default function CompareIPhones() {
         const phone = phones.find(p => p.name === phoneName)
         if (phone) {
           const shortFeature = getShortFeatureName(feature)
-          setMouseoverData((prevData) => [...prevData, `${phone.shortName}-${shortFeature}-${duration}`])
+          // Only add to mouseoverData if it's not an attempt (learn more was clicked)
+          const phoneIndex = phones.findIndex((p) => p.name === phoneName)
+          if (learnMoreStates[phoneIndex]) {
+            setMouseoverData((prevData) => [...prevData, `${phone.shortName}-${shortFeature}-${duration}`])
+          }
         }
       }
       mouseoverStartTime.current = null
@@ -207,17 +214,23 @@ export default function CompareIPhones() {
         return feature.slice(0, 3).toLowerCase()
     }
   }
-  
+
   useEffect(() => {
     return () => {
       if (mouseoverStartTime.current && currentMouseover.current) {
         const duration = Date.now() - mouseoverStartTime.current
         if (duration >= 20) {
-          setMouseoverData((prevData) => [...prevData, `${currentMouseover.current}-${duration}`])
+          const [phoneName, feature] = currentMouseover.current.split("-")
+          const phone = phones.find(p => p.name === phoneName)
+          const phoneIndex = phones.findIndex((p) => p.name === phoneName)
+          if (phone && learnMoreStates[phoneIndex]) {
+            const shortFeature = getShortFeatureName(feature)
+            setMouseoverData((prevData) => [...prevData, `${phone.shortName}-${shortFeature}-${duration}`])
+          }
         }
       }
     }
-  }, [])
+  }, [learnMoreStates, phones])
 
   if (showCompletionPage) {
     return (
@@ -250,7 +263,7 @@ export default function CompareIPhones() {
       <div className="px-4 py-8 space-y-8">
         <div className="text-center">
           <h1 className="text-2xl font-semibold">MODEL. Which is best for you? </h1>
-		  <p className="text-base mt-2">To choose, select Buy next to the one that is best for you. On this screen, you can choose any option (any of the 3 iPhones) or you can click learn more or other buttons.</p>
+          <p className="text-base mt-2">To choose, select Buy next to the one that is best for you. On this screen, you can choose any option (any of the 3 iPhones) or you can click learn more or other buttons.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
