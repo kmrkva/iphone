@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Battery, Camera, Cpu, ZoomIn, Maximize, Usb } from "lucide-react"
+import { Battery, Camera, Cpu, ZoomIn, Maximize, Usb, Check } from "lucide-react"
 import { type LucideIcon } from 'lucide-react'
 
 function getQueryParams(): Record<string, string> {
@@ -25,14 +25,13 @@ export default function CompareIPhones() {
   const [mouseoverData, setMouseoverData] = useState<string[]>([])
   const mouseoverStartTime = useRef<number | null>(null)
   const currentMouseover = useRef<string | null>(null)
-  const [showCompletionPage, setShowCompletionPage] = useState(false)
   const [qualtricsParms, setQualtricsParms] = useState<Record<string, string>>({})
 
   useEffect(() => {
     // Store Qualtrics parameters on initial load
     setQualtricsParms(getQueryParams())
   }, [])
-
+  
   const phones = [
     {
       name: "iPhone 16 Pro Max",
@@ -117,94 +116,48 @@ export default function CompareIPhones() {
       setShowCompletionPage(true)
       return
     }
-
-    // Clean and format mouseover data
-    const moData = mouseoverData
-      .filter(item => item) // Remove any null entries
-      .map(item => {
-        if (item.startsWith('attempt-')) {
-          // Keep attempt entries as is
-          return item
-        }
-        const [phoneName, feature, duration] = item.split("-")
-        const phone = phones.find(p => p.name === phoneName)
-        if (!phone) return null
-        const shortFeature = getShortFeatureName(feature)
-        return `${phone.shortName}-${shortFeature}-${duration}`
-      })
-      .filter(item => item) // Remove any null entries after processing
-      .join(",")
-      .slice(0, 4000)
+    const lmclicks = learnMoreClicks.join(",")
+    const moData = mouseoverData.map(item => {
+      const [phoneName, feature, duration] = item.split("-")
+      const phone = phones.find(p => p.name === phoneName)
+      if (!phone) return item
+      const shortFeature = feature.slice(0, 3)
+      return `${phone.shortName}-${shortFeature}-${duration}`
+    }).join(",").slice(0, 4000)
 
     // Construct URL with existing Qualtrics parameters and new parameters
     const baseUrl = 'https://baylor.qualtrics.com/jfe/form/SV_7VOYibk5CAELbYW/'
     const queryParams = new URLSearchParams({
       ...qualtricsParms,
-      lmclicks2: learnMoreClicks.join(","),
-      mo2: moData,
+      lmclicks: lmclicks,
+      mo: moData,
       exit: exitValue.toString(),
-      buy2: buyParam
+      buy: buyParam
     })
 
     router.push(`${baseUrl}?${queryParams.toString()}`)
   }
+
 
   const handleTopImageClick = () => {
     handleRedirect('', 1)  // Pass exit=1 directly here
   }
 
   const handleMouseEnter = (phoneName: string, feature: string) => {
-    const phoneIndex = phones.findIndex((phone) => phone.name === phoneName)
-    
-    // Start timing the mouseover
-    mouseoverStartTime.current = Date.now()
-    currentMouseover.current = `${phoneName}-${feature}`
-
-    if (!learnMoreStates[phoneIndex]) {
-      // If learn more hasn't been clicked, track as attempt
-      const shortFeature = getShortFeatureName(feature)
-      const phone = phones[phoneIndex]
-      setMouseoverData((prevData) => [...prevData, `attempt-${phone.shortName}-${shortFeature}-0`])
+    if (learnMoreStates[phones.findIndex((phone) => phone.name === phoneName)]) {
+      mouseoverStartTime.current = Date.now()
+      currentMouseover.current = `${phoneName}-${feature}`
     }
   }
 
   const handleMouseLeave = () => {
     if (mouseoverStartTime.current && currentMouseover.current) {
       const duration = Date.now() - mouseoverStartTime.current
-      const [phoneName, feature] = currentMouseover.current.split("-")
-      const shortFeature = getShortFeatureName(feature)
-      const phone = phones.find(p => p.name === phoneName)
-      if (phone) {
-        setMouseoverData((prevData) => [...prevData, `${phone.shortName}-${shortFeature}-${duration}`])
+      if (duration >= 20) {
+        setMouseoverData((prevData) => [...prevData, `${currentMouseover.current}-${duration}`])
       }
       mouseoverStartTime.current = null
       currentMouseover.current = null
-    }
-  }
-
-  const getShortFeatureName = (feature: string): string => {
-    switch (feature.toLowerCase()) {
-      case "iphone display":
-      case "display":
-        return "dis"
-      case "optical zoom":
-      case "opticalzoom":
-        return "opt"
-      case "chip":
-        return "chi"
-      case "camera":
-        return "cam"
-      case "battery life":
-      case "batterylife":
-        return "bat"
-      case "iphone size":
-      case "iphonesize":
-        return "siz"
-      case "transfer speeds":
-      case "transferspeeds":
-        return "tra"
-      default:
-        return feature.slice(0, 3).toLowerCase()
     }
   }
 
@@ -212,15 +165,12 @@ export default function CompareIPhones() {
     return () => {
       if (mouseoverStartTime.current && currentMouseover.current) {
         const duration = Date.now() - mouseoverStartTime.current
-        const [phoneName, feature] = currentMouseover.current.split("-")
-        const shortFeature = getShortFeatureName(feature)
-        const phone = phones.find(p => p.name === phoneName)
-        if (phone) {
-          setMouseoverData((prevData) => [...prevData, `${phone.shortName}-${shortFeature}-${duration}`])
+        if (duration >= 20) {
+          setMouseoverData((prevData) => [...prevData, `${currentMouseover.current}-${duration}`])
         }
       }
     }
-  }, [learnMoreStates, phones])
+  }, [])
 
   if (showCompletionPage) {
     return (
@@ -260,7 +210,7 @@ export default function CompareIPhones() {
           {phones.map((phone, index) => (
             <div key={index} className="border rounded-lg p-6 space-y-6">
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-center">{phone.name}</h2>
+                <h2 className="text-xl font-medium text-center">{phone.name}</h2>
                 <div className="flex flex-col">
                   <div className="relative" style={{ height: phone.imageHeight }}>
                     <Image src={phone.image || "/placeholder.svg"} alt={phone.name} fill className="object-contain" />
