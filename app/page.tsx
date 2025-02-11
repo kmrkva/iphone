@@ -25,6 +25,7 @@ export default function CompareIPhones() {
   const [mouseoverData, setMouseoverData] = useState<string[]>([])
   const mouseoverStartTime = useRef<number | null>(null)
   const currentMouseover = useRef<string | null>(null)
+  const [showCompletionPage, setShowCompletionPage] = useState(false)
   const [qualtricsParms, setQualtricsParms] = useState<Record<string, string>>({})
 
   useEffect(() => {
