@@ -130,10 +130,10 @@ export default function CompareIPhones() {
     const baseUrl = 'https://baylor.qualtrics.com/jfe/form/SV_7VOYibk5CAELbYW/'
     const queryParams = new URLSearchParams({
       ...qualtricsParms,
-      lmclicks: lmclicks,
-      mo: moData,
+      lmclicks2: lmclicks,
+      mo2: moData,
       exit: exitValue.toString(),
-      buy: buyParam
+      buy2: buyParam
     })
 
     router.push(`${baseUrl}?${queryParams.toString()}`)
