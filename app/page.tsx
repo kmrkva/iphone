@@ -119,7 +119,6 @@ export default function CompareIPhones() {
     }
 
     // Construct URL with original and Qualtrics parameters
-    const lmclicks = learnMoreClicks.join(",")
     const moData = mouseoverData
       .filter(item => item) // Remove any null entries
       .map(item => {
