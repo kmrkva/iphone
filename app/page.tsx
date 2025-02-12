@@ -229,7 +229,7 @@ export default function CompareIPhones() {
           {phones.map((phone, index) => (
             <div key={index} className="border rounded-lg p-6 space-y-6">
               <div className="space-y-4">
-                <h2 className="text-xl font-medium text-center">{phone.name}</h2>
+                <h2 className="text-xl font-semibold text-center">{phone.name}</h2>
                 <div className="flex flex-col">
                   <div className="relative" style={{ height: phone.imageHeight }}>
                     <Image src={phone.image || "/placeholder.svg"} alt={phone.name} fill className="object-contain" />
