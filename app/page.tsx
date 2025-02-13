@@ -173,12 +173,10 @@ export default function CompareIPhones() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-white">
         <div className="text-center">
-          <p className="mb-4">Thank you for your time taking this survey. Some participants (including you) were given a short survey, without follow-up questions. You will still receive payment for t[...]
-          
+          <p className="mb-4">Thank you for your time taking this survey. Some participants (including you) were given a short survey, without follow-up questions. You will still receive payment for taking this survey.</p>
           <p className="text-2xl font-bold bg-yellow-200 inline-block p-2 mb-4">
             Completion code: DENZY91
           </p>
-          
           <p className="mt-4">To receive payment, please enter the above completion code on Cloudresearch.</p>
         </div>
       </div>
@@ -309,7 +307,7 @@ function FeatureItem({
       onMouseLeave={onMouseLeave}
     >
       {isEnabled && (
-        <div className="w-full h-full min-h-[80px] opacity-0 group-hover:opacity-100 absolute inset-0 transition-opacity duration-200 flex flex-col items-center justify-center bg-white/80 backdrop-blu[...]
+        <div className="w-full h-full min-h-[80px] opacity-0 group-hover:opacity-100 absolute inset-0 transition-opacity duration-200 flex flex-col items-center justify-center bg-white/80 backdrop-blur-md">
           <p className="text-sm font-medium">{text}</p>
           {subText && <p className="text-xs text-gray-600 whitespace-pre-line">{subText}</p>}
         </div>
