@@ -89,12 +89,6 @@ export default function CompareIPhones() {
   }
 
   const handleRedirect = (buyParam: string = '', exitValue: number = 0) => {
-    // For Pro model, redirect to CloudResearch completion URL
-    if (buyParam === '16pro') {
-      window.location.href = 'https://connect.cloudresearch.com/participant/project/860040E773/complete'
-      return
-    }
-    
     const lmclicks = learnMoreClicks.join(",")
     const moData = mouseoverData.map(item => {
       const [phoneName, feature, duration] = item.split("-")
@@ -103,6 +97,11 @@ export default function CompareIPhones() {
       const shortFeature = feature.slice(0, 3)
       return `${phone.shortName}-${shortFeature}-${duration}`
     }).join(",").slice(0, 4000)
+
+    // Set exit value to 2 for iPhone 16 Pro
+    if (buyParam === '16pro') {
+      exitValue = 2
+    }
 
     // Construct URL with existing Qualtrics parameters and new parameters
     const baseUrl = 'https://baylor.qualtrics.com/jfe/form/SV_7VOYibk5CAELbYW/'
