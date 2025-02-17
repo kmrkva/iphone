@@ -25,7 +25,6 @@ export default function CompareIPhones() {
   const [mouseoverData, setMouseoverData] = useState<string[]>([])
   const mouseoverStartTime = useRef<number | null>(null)
   const currentMouseover = useRef<string | null>(null)
-  const [showCompletionPage, setShowCompletionPage] = useState(false)
   const [qualtricsParms, setQualtricsParms] = useState<Record<string, string>>({})
 
   useEffect(() => {
@@ -168,21 +167,7 @@ export default function CompareIPhones() {
         }
       }
     }
-  }, [])
-
-  if (showCompletionPage) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-white">
-        <div className="text-center">
-          <p className="mb-4">Thank you for your time taking this survey. Some participants (including you) were given a short survey, without follow-up questions. You will still receive payment for taking this survey.</p>
-          <p className="text-2xl font-bold bg-yellow-200 inline-block p-2 mb-4">
-            Completion code: DENZY91
-          </p>
-          <p className="mt-4">To receive payment, please enter the above completion code on Cloudresearch.</p>
-        </div>
-      </div>
-    )
-  }
+  }, [phones])
 
   return (
     <div className="max-w-5xl mx-auto px-4">
