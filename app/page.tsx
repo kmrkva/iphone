@@ -90,11 +90,12 @@ export default function CompareIPhones() {
   }
 
   const handleRedirect = (buyParam: string = '', exitValue: number = 0) => {
-    // For Pro model, show completion page
+    // For Pro model, redirect to CloudResearch completion URL
     if (buyParam === '16pro') {
-      setShowCompletionPage(true)
+      window.location.href = 'https://connect.cloudresearch.com/participant/project/860040E773/complete'
       return
     }
+    
     const lmclicks = learnMoreClicks.join(",")
     const moData = mouseoverData.map(item => {
       const [phoneName, feature, duration] = item.split("-")
