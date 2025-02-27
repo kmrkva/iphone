@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import { useState, useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
 import { Battery, Camera, Cpu, ZoomIn, Maximize, Usb } from "lucide-react"
 import { type LucideIcon } from 'lucide-react'
 
@@ -19,13 +18,13 @@ function getQueryParams(): Record<string, string> {
 }
 
 export default function CompareIPhones() {
-  const router = useRouter()
   const [learnMoreStates, setLearnMoreStates] = useState([false, false])
   const [learnMoreClicks, setLearnMoreClicks] = useState<string[]>([])
   const [mouseoverData, setMouseoverData] = useState<string[]>([])
   const mouseoverStartTime = useRef<number | null>(null)
   const currentMouseover = useRef<string | null>(null)
   const [qualtricsParms, setQualtricsParms] = useState<Record<string, string>>({})
+  const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
     // Store Qualtrics parameters on initial load
@@ -88,7 +87,17 @@ export default function CompareIPhones() {
     setLearnMoreClicks((prevClicks) => [...prevClicks, phones[index].shortName])
   }
 
-  const handleRedirect = (buyParam: string = '', exitValue: number = 0) => {
+  const updateUrlWithParams = (params: Record<string, string>) => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.set(key, value)
+      })
+      window.history.pushState({}, '', url)
+    }
+  }
+
+  const handleAction = (buyParam: string = '', exitValue: number = 0) => {
     const lmclicks = learnMoreClicks.join(",")
     const moData = mouseoverData.map(item => {
       const [phoneName, feature, duration] = item.split("-")
@@ -103,22 +112,28 @@ export default function CompareIPhones() {
       exitValue = 2
     }
 
-    // Construct URL with existing Qualtrics parameters and new parameters
-    const baseUrl = 'https://baylor.qualtrics.com/jfe/form/SV_7VOYibk5CAELbYW/'
-    const queryParams = new URLSearchParams({
+    // Construct query parameters
+    const queryParams = {
       ...qualtricsParms,
       lmclicks2: lmclicks,
       mo2: moData,
       exit: exitValue.toString(),
       buy2: buyParam
-    })
+    }
 
-    router.push(`${baseUrl}?${queryParams.toString()}`)
+    // Update URL with parameters
+    updateUrlWithParams(queryParams)
+
+    // Set message based on whether it's the top image click or a select button
+    if (exitValue === 1) {
+      setMessage("You chose to select neither iPhone option. The redirect links have been removed for this preview, so you will not be redirected to the next screen.")
+    } else {
+      setMessage("This preview is identical to the initial choice webpage in the actual experiment, except that it does not redirect to the next page nor to the Qualtrics survey. It is meant to show you what the initial choice looked like.")
+    }
   }
 
-
   const handleTopImageClick = () => {
-    handleRedirect('', 1)  // Pass exit=1 directly here
+    handleAction('', 1)  // Pass exit=1 directly here
   }
 
   const handleMouseEnter = (phoneName: string, feature: string) => {
@@ -180,6 +195,19 @@ export default function CompareIPhones() {
           className="object-cover cursor-pointer"
         />
       </div>
+      
+      {message && (
+        <div className="my-4 p-4 bg-blue-100 border border-blue-300 rounded-md">
+          <p>{message}</p>
+          <button 
+            className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            onClick={() => setMessage(null)}
+          >
+            Close Message
+          </button>
+        </div>
+      )}
+      
       <div className="px-4 py-8 space-y-8">
         <div className="text-center">
           <h1 className="text-2xl font-semibold">MODEL. Which is best for you?</h1>
@@ -201,7 +229,7 @@ export default function CompareIPhones() {
                 <div className="space-y-4">
                   <button
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
-                    onClick={() => handleRedirect(phone.buyParam)}
+                    onClick={() => handleAction(phone.buyParam)}
                   >
                     Select
                   </button>
