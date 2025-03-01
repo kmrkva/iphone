@@ -25,6 +25,7 @@ export default function CompareIPhones() {
   const currentMouseover = useRef<string | null>(null)
   const [qualtricsParms, setQualtricsParms] = useState<Record<string, string>>({})
   const [message, setMessage] = useState<string | null>(null)
+  const [selectedPhone, setSelectedPhone] = useState<boolean>(false)
 
   useEffect(() => {
     // Store Qualtrics parameters on initial load
@@ -130,6 +131,9 @@ export default function CompareIPhones() {
     } else {
       setMessage("This preview is identical to the initial choice webpage in the actual experiment, except that it does not redirect to the next page nor to the Qualtrics survey. It is meant to show you what the initial choice looked like.")
     }
+    
+    // Set selected state to hide other content
+    setSelectedPhone(true)
   }
 
   const handleTopImageClick = () => {
@@ -183,8 +187,14 @@ export default function CompareIPhones() {
     }
   }, [phones])
 
+  const handleCloseMessage = () => {
+    setMessage(null)
+    setSelectedPhone(false)
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-4">
+      {/* Top browser image - always show */}
       <div className="relative w-full" onClick={handleTopImageClick}>
         <Image 
           src="/topbrowser.png" 
@@ -196,89 +206,98 @@ export default function CompareIPhones() {
         />
       </div>
       
+      {/* Message - show when displayed */}
       {message && (
         <div className="my-4 p-4 bg-blue-100 border border-blue-300 rounded-md">
           <p>{message}</p>
           <button 
             className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            onClick={() => setMessage(null)}
+            onClick={handleCloseMessage}
           >
             Close Message
           </button>
         </div>
       )}
       
-      <div className="px-4 py-8 space-y-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold">MODEL. Which is best for you?</h1>
-          <p className="text-base mt-2">To choose, click Select next to the one that is best for you. On this screen, you can choose either option or you can click Learn more to get additional information.</p>
-        </div>
+      {/* Main content - hide when a phone is selected */}
+      {!selectedPhone && (
+        <div className="px-4 py-8 space-y-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold">MODEL. Which is best for you?</h1>
+            <p className="text-base mt-2">To choose, click Select next to the one that is best for you. On this screen, you can choose either option or you can click Learn more to get additional information.</p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {phones.map((phone, index) => (
-            <div key={index} className="border rounded-lg p-6 space-y-6">
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-center">{phone.name}</h2>
-                <div className="flex flex-col">
-                  <div className="relative" style={{ height: phone.imageHeight }}>
-                    <Image src={phone.image || "/placeholder.svg"} alt={phone.name} fill className="object-contain" />
-                  </div>
-                  <div style={{ height: `${280 - phone.imageHeight}px` }} />
-                </div>
-                <p className="text-sm text-center">{phone.price}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {phones.map((phone, index) => (
+              <div key={index} className="border rounded-lg p-6 space-y-6">
                 <div className="space-y-4">
-                  <button
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
-                    onClick={() => handleAction(phone.buyParam)}
-                  >
-                    Select
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <p className="text-xs text-center text-gray-600">
-                  If you&apos;d like to learn more information about the phone in this column, click &quot;learn more&quot;
-                  directly below and then hover over the features (e.g., &quot;optical zoom&quot; or
-                  &quot;chip&quot;).
-                </p>
-                <button
-                  className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800"
-                  onClick={() => handleLearnMore(index)}
-                >
-                  Learn more
-                </button>
-              </div>
-
-              {learnMoreStates[index] && (
-                <div className="space-y-4 pt-4">
-                  <FeatureItem
-                    text={phone.display.label}
-                    subText={`${phone.display.type}\n${phone.display.tech}\n${phone.display.extra}`}
-                    isEnabled={learnMoreStates[index]}
-                    onMouseEnter={() => handleMouseEnter(phone.name, "display")}
-                    onMouseLeave={handleMouseLeave}
-                  />
-
-                  <div className="space-y-4 grid grid-cols-1 gap-2">
-                    {Object.entries(phone.features).map(([key, value]) => (
-                      <FeatureItem
-                        key={key}
-                        icon={getIconForFeature(key)}
-                        text={getFeatureDisplayName(key)}
-                        subText={value}
-                        isEnabled={learnMoreStates[index]}
-                        onMouseEnter={() => handleMouseEnter(phone.name, key)}
-                        onMouseLeave={handleMouseLeave}
-                      />
-                    ))}
+                  <h2 className="text-xl font-semibold text-center">{phone.name}</h2>
+                  <div className="flex flex-col">
+                    <div className="relative" style={{ height: phone.imageHeight }}>
+                      <Image src={phone.image || "/placeholder.svg"} alt={phone.name} fill className="object-contain" />
+                    </div>
+                    <div style={{ height: `${280 - phone.imageHeight}px` }} />
+                  </div>
+                  <p className="text-sm text-center">{phone.price}</p>
+                  <div className="space-y-4">
+                    <button
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+                      onClick={() => handleAction(phone.buyParam)}
+                    >
+                      Select
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-          ))}
+
+                <div className="space-y-4">
+                  <p className="text-xs text-center text-gray-600">
+                    If you&apos;d like to learn more information about the phone in this column, click &quot;learn more&quot;
+                    directly below and then hover over the features (e.g., &quot;optical zoom&quot; or
+                    &quot;chip&quot;).
+                  </p>
+                  <button
+                    className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800"
+                    onClick={() => handleLearnMore(index)}
+                  >
+                    Learn more
+                  </button>
+                  
+                  {/* Added white space that disappears when Learn More is clicked */}
+                  {!learnMoreStates[index] && (
+                    <div className="h-24"></div>
+                  )}
+                </div>
+
+                {learnMoreStates[index] && (
+                  <div className="space-y-4 pt-4">
+                    <FeatureItem
+                      text={phone.display.label}
+                      subText={`${phone.display.type}\n${phone.display.tech}\n${phone.display.extra}`}
+                      isEnabled={learnMoreStates[index]}
+                      onMouseEnter={() => handleMouseEnter(phone.name, "display")}
+                      onMouseLeave={handleMouseLeave}
+                    />
+
+                    <div className="space-y-4 grid grid-cols-1 gap-2">
+                      {Object.entries(phone.features).map(([key, value]) => (
+                        <FeatureItem
+                          key={key}
+                          icon={getIconForFeature(key)}
+                          text={getFeatureDisplayName(key)}
+                          subText={value}
+                          isEnabled={learnMoreStates[index]}
+                          onMouseEnter={() => handleMouseEnter(phone.name, key)}
+                          onMouseLeave={handleMouseLeave}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
